@@ -1,5 +1,5 @@
 #---CONSTANTS---
-
+MAX_SPEED = 110
 
 
 #---PROGRAM FUNCTIONS---
@@ -45,8 +45,39 @@ def get_drivers_license():
 
     return license_no  
 
-print(get_drivers_license())
-
+def validate_speed(): 
+    '''CHECKS SPPED - makes sure recorded offending speed is greater than
+    posted speed'''
     
+    is_valid = False
+    recorded_speed = ''
+    
+    while not is_valid: #Asks for offending speed
+        user_input = input("Enter driver's speed: ").strip()
+        
+        #ensures speed is breaching limit. else, returns no offence
+        if user_input.isdigit():
+            temp_speed = int(user_input)
+            if temp_speed > MAX_SPEED:
+                recorded_speed = temp_speed
+                is_valid = True
+            else: 
+                print('''Error: Driver's speed does not exceed posted 30-110km/hspeed.
+                No offence occurred.''')
+        else:
+            print("Error: Please enter a whole number.")        
+    
+    return recorded_speed
+
+print (validate_speed())
+
+def calculate_fine():
+    
+    
+    
+    
+    
+    
+
 def speeding_offence():
     '''RECORDING AN OFFENCE AND COLLECTS DRIVERS RELEVANT INFO'''
