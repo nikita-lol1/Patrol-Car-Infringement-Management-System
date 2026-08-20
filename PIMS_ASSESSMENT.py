@@ -1,6 +1,10 @@
 #---CONSTANTS---
 MAX_SPEED = 110
-
+WANTED_LIST = ["JOHN SMITH",
+    "PETER BROWN",
+    "MARY JONES",
+    "BRUCE WAYNE",
+    "SARAH CONNOR"]
 
 #---PROGRAM FUNCTIONS---
 
@@ -23,7 +27,7 @@ def get_driver_name():
             print("Error: Must include at least 2 names with letters only.\n"
                   "Blank or single-word entries are not accepted.\n")
 
-    return driver_name
+    return driver_name.upper()
 
 def get_drivers_license():
     '''ASKS FOR LICENSE NO. - Ensures only contains 2 letters followed by 2
@@ -62,7 +66,7 @@ def validate_speed():
                 recorded_speed = temp_speed
                 is_valid = True
             else: 
-                print('''Error: Driver's speed does not exceed posted 30-110km/hspeed.
+                print('''Error: Driver's speed does not exceed posted 30-110km/h speed.
                 No offence occurred.''')
         else:
             print("Error: Please enter a whole number.")        
@@ -71,11 +75,30 @@ def validate_speed():
 
 print (validate_speed())
 
-def calculate_fine():
+def calculate_fine(speed_over):
+    """Calculates the fine based on speed over limit."""
+    if 1 <= speed_over <= 10:
+        return 30
+    elif 11 <= speed_over <= 20:
+        return 80
+    elif 21 <= speed_over <= 30:
+        return 170
+    elif 31 <= speed_over <= 40:
+        return 400
+    else:
+        return 630
     
+def check_warrant(driver_name):
+    """Checks if driver name is on wanted list. Prints a warning if matched."""
+    if driver_name.upper().strip() in WANTED_LIST:
+        print("\n" + "!" * 55)
+        print(f"  WARNING: DRIVER '{driver_name.upper()}' IS ON THE WANTED LIST!")
+        print("!" * 55 + "\n")    
     
+    return none
     
-    
+print (get_driver_name())    
+check_warrant(driver_name)
     
     
 
