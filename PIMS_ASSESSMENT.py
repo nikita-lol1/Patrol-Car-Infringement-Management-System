@@ -6,8 +6,7 @@ WANTED_LIST = ["JOHN SMITH",
     "BRUCE WAYNE",
     "SARAH CONNOR"]
 
-#---PROGRAM FUNCTIONS---
-
+#---PROGRAM FUNCTIONS WITHIN COMPONENTS---
 
 def get_driver_name():
     """ASKS FOR FULL NAME - Ensures alpha-only format and title case output."""
@@ -73,10 +72,8 @@ def validate_speed():
     
     return recorded_speed
 
-print (validate_speed())
-
 def calculate_fine(speed_over):
-    """Calculates the fine based on speed over limit."""
+    """Calculates the fine based on speed over limit"""
     if 1 <= speed_over <= 10:
         return 30
     elif 11 <= speed_over <= 20:
@@ -91,16 +88,57 @@ def calculate_fine(speed_over):
 def check_warrant(driver_name):
     """Checks if driver name is on wanted list. Prints a warning if matched."""
     if driver_name.upper().strip() in WANTED_LIST:
-        print("\n" + "!" * 55)
-        print(f"  WARNING: DRIVER '{driver_name.upper()}' IS ON THE WANTED LIST!")
-        print("!" * 55 + "\n")    
+        print(f"  WARNING: {driver_name.upper()} IS ON THE WANTED LIST!")   
     
     return none
     
-print (get_driver_name())    
-check_warrant(driver_name)
-    
-    
+#------MAIN PAGE FUNCTIONS----------
 
-def speeding_offence():
-    '''RECORDING AN OFFENCE AND COLLECTS DRIVERS RELEVANT INFO'''
+def record_offence(offences_list):
+    """Collects info, validates, checks wanted list, and stores offence."""
+
+    driver_name = get_valid_name()
+    licence_num = get_valid_licence()
+
+    # Warrant check
+    check_warrant(driver_name)
+
+    posted_limit = validate_speed()
+
+    is_invalid_speed = True
+    while is_invalid_speed:
+        try:
+            recorded_speed = int(input("Enter recorded speed (km/h): "))
+            if recorded_speed > 0:
+                is_invalid_speed = False
+            else:
+                print("Recorded speed must be greater than 0.")
+        except ValueError:
+            print("Invalid input. Please enter a whole number.")
+
+    # Validation check: speed must exceed limit for an offence to occur
+    if recorded_speed <= posted_limit:
+        print(f'''\nNo speeding offence has occurred. 
+        (Recorded: {recorded_speed} km/h <= Limit: {posted_limit} km/h)''')
+        return None
+
+    speed_over = recorded_speed - posted_limit
+    fine_amount = calculate_fine(speed_over)
+
+    # Store offence record as dictionary
+    offence_record = {
+        "name": driver_name,
+        "licence": licence_num,
+        "limit": posted_limit,
+        "speed": recorded_speed,
+        "over": speed_over,
+        "fine": fine_amount
+    }
+    
+    offences_list.append(offence_record)
+
+    print("\n--- Offence Recorded Successfully ---")
+    print(f"Driver Name : {driver_name}")
+    print(f"Licence No  : {licence_num}")
+    print(f"Speed Over  : {speed_over} km/h")
+    print(f"Fine Amount : ${fine_amount}\n")
