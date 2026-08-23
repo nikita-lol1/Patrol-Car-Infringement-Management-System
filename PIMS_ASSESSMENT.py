@@ -1,10 +1,6 @@
 #---CONSTANTS---
 MAX_SPEED = 110
-WANTED_LIST = ["JOHN SMITH",
-    "PETER BROWN",
-    "MARY JONES",
-    "BRUCE WAYNE",
-    "SARAH CONNOR"]
+WANTED_LIST = ["NIKITA SMITH","BOB SMITH","ROB SMITH","COB SMITH","NOB SMITH"]
 
 #---PROGRAM FUNCTIONS WITHIN COMPONENTS---
 
@@ -90,15 +86,16 @@ def check_warrant(driver_name):
     if driver_name.upper().strip() in WANTED_LIST:
         print(f"  WARNING: {driver_name.upper()} IS ON THE WANTED LIST!")   
     
-    return none
+    return None
     
 #------MAIN PAGE FUNCTIONS----------
 
 def record_offence(offences_list):
     """Collects info, validates, checks wanted list, and stores offence."""
-
-    driver_name = get_valid_name()
-    licence_num = get_valid_licence()
+    
+    print("\n--- Record Speeding Offence ---")
+    driver_name = get_driver_name()
+    licence_num = get_driver_licence()
 
     # Warrant check
     check_warrant(driver_name)
@@ -116,7 +113,7 @@ def record_offence(offences_list):
         except ValueError:
             print("Invalid input. Please enter a whole number.")
 
-    # Validation check: speed must exceed limit for an offence to occur
+    # speed must be over limit for offence
     if recorded_speed <= posted_limit:
         print(f'''\nNo speeding offence has occurred. 
         (Recorded: {recorded_speed} km/h <= Limit: {posted_limit} km/h)''')
@@ -125,7 +122,7 @@ def record_offence(offences_list):
     speed_over = recorded_speed - posted_limit
     fine_amount = calculate_fine(speed_over)
 
-    # Store offence record as dictionary
+    # store offence record as dictionary
     offence_record = {
         "name": driver_name,
         "licence": licence_num,
@@ -141,4 +138,51 @@ def record_offence(offences_list):
     print(f"Driver Name : {driver_name}")
     print(f"Licence No  : {licence_num}")
     print(f"Speed Over  : {speed_over} km/h")
-    print(f"Fine Amount : ${fine_amount}\n")
+    print(f"Fine Amount : ${fine_amount}\n")    
+
+def view_all_offences(offences_list):
+    """Displays offences that were recorded in table."""
+    print("\n--- Recorded Patrol Offences ---")
+    if not offences_list:
+        print("No offences recorded during this patrol.")
+        return None
+
+    # alignment for merit
+    header = f"{'Driver':<20} {'Licence':<10} {'Limit':<7} {'Speed':<7} {'Over':<6} {'Fine':<6}"
+    print(header)
+    print("-" * len(header))
+
+    for rec in offences_list:
+        print(f"{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}")
+    print()
+    
+def search_offence_records(offences_list): 
+    """searches offence by full name or license no.""" 
+    print("\n--- Search Offence Records ---") 
+    if not offences_list: 
+        print("No offences recorded yet") 
+        return None 
+        
+    search = input("Enter driver full name or licence number to search: ").strip().upper() 
+    found_records = [rec for rec in offences_list if search in rec['name'].upper() or search == rec['licence']] 
+    
+    if not found_records: 
+        print(f"No records found matching search: '{search}'") 
+        return None 
+        
+    print(f"\nFound {len(found_records)} matching record(s):") 
+    header = f"{'Driver':<20} {'Licence':<10} {'Limit':<7} {'Speed':<7} {'Over':<6} {'Fine':<6}" 
+    print(header) 
+    print("-" * len(header)) 
+    
+    for rec in found_records: 
+        print(f"{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}") 
+    print() 
+    
+def display_patrol_summary(offences_list):
+    '''shows complete list in right format of all offences made on that patrol'''
+    print("\n--- Patrol Summary ---")
+    if not offences_list:
+        print("No offences recorded during this patrol.")
+        return None
+    
