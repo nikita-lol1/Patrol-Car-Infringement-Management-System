@@ -1,8 +1,25 @@
 #---CONSTANTS---
-MAX_SPEED = 110
 WANTED_LIST = ["NIKITA SMITH","BOB SMITH","ROB SMITH","COB SMITH","NOB SMITH"]
+PASSWORD = "45110"
 
 #---PROGRAM FUNCTIONS WITHIN COMPONENTS---
+
+def check_password():
+    """ADRESS PRIVACY - Asks for password with a max of 3 attempts."""
+    attempts = 3
+    
+    while attempts > 0:
+        user_input = input("Enter password: ").strip()
+        if user_input == PASSWORD:
+            print("Access granted.\n")
+            return True
+        else:
+            attempts -= 1
+            if attempts > 0:
+                print(f"Incorrect password. You have {attempts} attempt(s) left.\n")
+            else:
+                print("Access denied. Too many incorrect attempts.")
+                return False
 
 def get_driver_name():
     """ASKS FOR FULL NAME - Ensures alpha-only format and title case output."""
@@ -25,7 +42,7 @@ def get_driver_name():
     return driver_name.upper()
 
 def get_drivers_license():
-    '''ASKS FOR LICENSE NO. - Ensures only contains 2 letters followed by 2
+    '''ASKS FOR LICENSE NO. - Ensures only contains 2 letters followed by 4
     numbers in capital'''
     
     is_valid = False
@@ -44,32 +61,50 @@ def get_drivers_license():
 
     return license_no  
 
-def validate_speed(): 
-    '''CHECKS SPPED - makes sure recorded offending speed is greater than
-    posted speed'''
+def validate_speed():
+    '''CHECK SPPED VIOLATION - Validates posted speed limit (30-110 km/h) 
+    checks if recorded speed exceeds it.'''
+    posted_limit = 0
+    is_limit_valid = False
     
-    is_valid = False
-    recorded_speed = ''
-    
-    while not is_valid: #Asks for offending speed
-        user_input = input("Enter driver's speed: ").strip()
+    # Get and validate the posted speed limit
+    while not is_limit_valid:
+        user_input = input("Enter posted speed limit (30-110 km/h): ").strip()
         
-        #ensures speed is breaching limit. else, returns no offence
+        if user_input.isdigit():
+            temp_limit = int(user_input)
+            if 30 <= temp_limit <= 110:
+                posted_limit = temp_limit
+                is_limit_valid = True
+            else:
+                print("Error: Posted speed limit must be between 30 and 110 km/h.")
+        else:
+            print("Error: Invalid input. Please enter a whole number.")
+
+    recorded_speed = 0
+    is_speed_valid = False
+    
+    # Get and validate the driver's recorded speed
+    while not is_speed_valid:
+        user_input = input("Enter recorded driver speed: ").strip()
+        
         if user_input.isdigit():
             temp_speed = int(user_input)
-            if temp_speed > MAX_SPEED:
+            if temp_speed > posted_limit:
                 recorded_speed = temp_speed
-                is_valid = True
-            else: 
-                print('''Error: Driver's speed does not exceed posted 30-110km/h speed.
-                No offence occurred.''')
+                is_speed_valid = True
+            else:
+                print(f'''No offence occurred. Recorded speed ({temp_speed} km/h) 
+                does not exceed posted limit ({posted_limit} km/h).''')
+                return None  #Takes the user back to the main menu
         else:
-            print("Error: Please enter a whole number.")        
-    
-    return recorded_speed
+            print("Error: Invalid input. Please enter a whole number.")
+            
+    return posted_limit, recorded_speed
+
 
 def calculate_fine(speed_over):
-    """Calculates the fine based on speed over limit"""
+    """CALCULATE FINE - based on speed over limit"""
     if 1 <= speed_over <= 10:
         return 30
     elif 11 <= speed_over <= 20:
@@ -82,7 +117,8 @@ def calculate_fine(speed_over):
         return 630
     
 def check_warrant(driver_name):
-    """Checks if driver name is on wanted list. Prints a warning if matched."""
+    """VERIFIES NAME - Checks if driver name is on wanted list. 
+    Prints a warning if matched."""
     if driver_name.upper().strip() in WANTED_LIST:
         print(f"  WARNING: {driver_name.upper()} IS ON THE WANTED LIST!")   
     
@@ -91,33 +127,23 @@ def check_warrant(driver_name):
 #------MAIN PAGE FUNCTIONS----------
 
 def record_offence(offences_list):
-    """Collects info, validates, checks wanted list, and stores offence."""
+    """DATA STORAGE - Collects info, validates, checks wanted list, 
+    and stores offence."""
     
     print("\n--- Record Speeding Offence ---")
     driver_name = get_driver_name()
-    licence_num = get_driver_licence()
+    licence_num = get_drivers_license()
 
     # Warrant check
     check_warrant(driver_name)
 
-    posted_limit = validate_speed()
-
-    is_invalid_speed = True
-    while is_invalid_speed:
-        try:
-            recorded_speed = int(input("Enter recorded speed (km/h): "))
-            if recorded_speed > 0:
-                is_invalid_speed = False
-            else:
-                print("Recorded speed must be greater than 0.")
-        except ValueError:
-            print("Invalid input. Please enter a whole number.")
-
-    # speed must be over limit for offence
-    if recorded_speed <= posted_limit:
-        print(f'''\nNo speeding offence has occurred. 
-        (Recorded: {recorded_speed} km/h <= Limit: {posted_limit} km/h)''')
+    speed_data = validate_speed()
+    
+    # Returns to main menu if validate_speed returns None (no offence occurred)
+    if speed_data is None:
         return None
+
+    posted_limit, recorded_speed = speed_data
 
     speed_over = recorded_speed - posted_limit
     fine_amount = calculate_fine(speed_over)
@@ -141,7 +167,7 @@ def record_offence(offences_list):
     print(f"Fine Amount : ${fine_amount}\n")    
 
 def view_all_offences(offences_list):
-    """Displays offences that were recorded in table."""
+    """SHOW DATA - Displays offences that were recorded in table."""
     print("\n--- Recorded Patrol Offences ---")
     if not offences_list:
         print("No offences recorded during this patrol.")
@@ -153,11 +179,12 @@ def view_all_offences(offences_list):
     print("-" * len(header))
 
     for rec in offences_list:
-        print(f"{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}")
+        print(f'''{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} 
+        {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}''')
     print()
     
 def search_offence_records(offences_list): 
-    """searches offence by full name or license no.""" 
+    """SEARCH OFFENCES - by full name or license no.""" 
     print("\n--- Search Offence Records ---") 
     if not offences_list: 
         print("No offences recorded yet") 
@@ -176,13 +203,67 @@ def search_offence_records(offences_list):
     print("-" * len(header)) 
     
     for rec in found_records: 
-        print(f"{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}") 
+        print(f'''{rec['name']:<20} {rec['licence']:<10} {rec['limit']:<7} 
+        {rec['speed']:<7} {rec['over']:<6} ${rec['fine']:<6}''') 
     print() 
     
 def display_patrol_summary(offences_list):
-    '''shows complete list in right format of all offences made on that patrol'''
+    '''COMPLETE LIST - in right format of all offences made on that patrol'''
     print("\n--- Patrol Summary ---")
     if not offences_list:
         print("No offences recorded during this patrol.")
         return None
+   
+    total_offences = len(offences_list)
+    total_fines = sum(rec['fine'] for rec in offences_list)
+    avg_speed_over = sum(rec['over'] for rec in offences_list) / total_offences
     
+    # Identify highest offence
+    highest_offence = max(offences_list, key=lambda x: x['over'])
+
+    print(f"Total offences            : {total_offences}")
+    print(f"Total fines issued        : ${total_fines}")
+    print(f"Average speed over limit  : {avg_speed_over:.1f} km/h")
+    print(f'''Highest offence           : {highest_offence['name']} 
+                                  ({highest_offence['over']} km/h over limit)''')
+    print()    
+    
+def main_menu():
+    '''MAIN MENU - users will be sent to to start program'''
+    # Run password check first
+    if not check_password():
+        return  # Exits program if password check fails
+
+    offences_list = []
+    is_running = True
+
+    while is_running:
+        print("-----------------------------")
+        print("    POLICE PATROL SYSTEM     ")
+        print("-----------------------------")
+        print("1. Record a speeding offence")
+        print("2. View all recorded offences")
+        print("3. Search offence records")
+        print("4. Display patrol summary")
+        print("5. Exit program")
+
+        choice = input("Select an option (1-5): ").strip()
+
+        if choice == '1':
+            record_offence(offences_list)
+        elif choice == '2':
+            view_all_offences(offences_list)
+        elif choice == '3':
+            search_offence_records(offences_list)
+        elif choice == '4':
+            display_patrol_summary(offences_list)
+        elif choice == '5':
+            print("Thank you for visting Police Patrol System!")
+            is_running = False
+        else:
+            print("ERROR: Please choose a number between 1 and 5.\n")
+
+
+if __name__ == "__main__":
+    main_menu()
+
